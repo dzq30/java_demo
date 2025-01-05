@@ -25,7 +25,7 @@ public class FibonacciPrinterWithSync extends Thread {
     public void run() {
         while (count < n) {
             synchronized (FibonacciPrinterWithSync.class) {
-                if (curThreadId != toPrintThreadId) {
+                while (curThreadId != toPrintThreadId) {
                     try {
                         FibonacciPrinterWithSync.class.wait();
                     } catch (InterruptedException e) {
