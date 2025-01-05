@@ -5,51 +5,53 @@ package mutilThread;
  * @Date 2025/1/3 14:39
  * @Description
  */
-public class FibonacciPrinterWithSync{
-    int currentThreadId; // 当前应该打印的线程id
-    int fib, current, next; // fib相关参数
-    int n, count; // 要打印的总数、已打印的个数
+public class FibonacciPrinterWithSync extends Thread {
+    private static int n, count;
+    private static int toPrintThreadId = 0;
+    private static int current, next = 1;
 
-    public FibonacciPrinterWithSync(int n) {
-        this.n = n;
-        this.next = 1;
-        this.fib = this.current = this.count = 0;
+    private int printCount = 0;
+    private final int curThreadId;
+
+    public FibonacciPrinterWithSync(int curThreadId) {
+        this.curThreadId = curThreadId;
     }
 
-    public synchronized void printFibonacci(int threadId) {
-        while (count <= n) {
-            while (threadId != currentThreadId) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+    public static void SetN(int n) {
+        FibonacciPrinterWithSync.n = n;
+    }
+
+    @Override
+    public void run() {
+        while (count < n) {
+            synchronized (FibonacciPrinterWithSync.class) {
+                if (curThreadId != toPrintThreadId) {
+                    try {
+                        FibonacciPrinterWithSync.class.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+                if (count >= n) return;
+                int fib = current;
+                current = next;
+                next = fib + current;
+                printCount++;
+                System.out.println("Thread " + curThreadId + " printCount: " + printCount + " printed: " + fib);
+                count++;
+                toPrintThreadId = (toPrintThreadId + 1) % 3;
+                FibonacciPrinterWithSync.class.notifyAll();
             }
-            if (count >= n) return;
-            fib = current;
-            current = next;
-            next = fib + current;
-            System.out.println("threadId = " + (threadId + 1) + ", fib = " + fib);
-            currentThreadId = (currentThreadId + 1) % 3;
-            count++;
-            notifyAll();
         }
     }
 }
 
 class SyncMain {
     public static void main(String[] args) {
-        //test multiThread();
-        FibonacciPrinterWithSync fibonacciPrinter = new FibonacciPrinterWithSync(15);
-        Thread thread1 = new Thread(() -> {
-            fibonacciPrinter.printFibonacci(0);
-        });
-        Thread thread2 = new Thread(() -> {
-            fibonacciPrinter.printFibonacci(1);
-        });
-        Thread thread3 = new Thread(() -> {
-            fibonacciPrinter.printFibonacci(2);
-        });
+        Thread thread1 = new FibonacciPrinterWithSync(0);
+        Thread thread2 = new FibonacciPrinterWithSync(1);
+        Thread thread3 = new FibonacciPrinterWithSync(2);
+        FibonacciPrinterWithSync.SetN(30);
         thread1.start();
         thread2.start();
         thread3.start();
