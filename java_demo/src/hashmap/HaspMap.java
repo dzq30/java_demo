@@ -21,7 +21,7 @@ public class HaspMap<K, V> {
     }
     private double loadFactor;
     private HashNode[] elementData;
-    private final int DEFAULT_CAPACITY = 10;
+    private final int DEFAULT_CAPACITY = 16;
     private final double DEFAULT_LOAD_FACTOR = 0.75;
     private int size, capacity;
 
