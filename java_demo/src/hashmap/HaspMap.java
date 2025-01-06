@@ -2,6 +2,8 @@ package hashmap;
 
 import java.util.HashMap;
 
+import static com.sun.xml.internal.fastinfoset.util.ValueArray.MAXIMUM_CAPACITY;
+
 /**
  * @author dzq
  * @Date 2025/1/5 15:36
@@ -34,8 +36,18 @@ public class HaspMap<K, V> {
         this.capacity = DEFAULT_CAPACITY;
         this.loadFactor = DEFAULT_LOAD_FACTOR;
         if (capacity > 0) {
-            this.capacity = capacity;
+            this.capacity = tableSizeFor(capacity);
         }
+    }
+
+    static final int tableSizeFor(int cap) {
+        int n = cap - 1;
+        n |= n >>> 1;
+        n |= n >>> 2;
+        n |= n >>> 4;
+        n |= n >>> 8;
+        n |= n >>> 16;
+        return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
     }
 
     public HaspMap(int capacity, double loadFactor) {
